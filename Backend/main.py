@@ -2,8 +2,15 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+
 # pyrefly: ignore [missing-import]
 from core.config import settings
+
+# pyrefly: ignore [missing-import]
+from routers.story_routes import router as story_router
+
+# pyrefly: ignore [missing-import]
+from routers.job_routes import router as job_router
 
 app = FastAPI(
     title="Story Mode Adventure Game",
@@ -20,6 +27,10 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True
 )
+
+app.include_router(story_router, prefix=settings.API_PREFIX)
+
+app.include_router(job_router, prefix=settings.API_PREFIX)
 
 if __name__ == "__main__":
     import uvicorn
