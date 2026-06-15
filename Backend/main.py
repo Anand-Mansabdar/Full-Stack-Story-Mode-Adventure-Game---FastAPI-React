@@ -12,6 +12,11 @@ from routers.story_routes import router as story_router
 # pyrefly: ignore [missing-import]
 from routers.job_routes import router as job_router
 
+# pyrefly: ignore [missing-import]
+from db.database import create_tables
+
+create_tables()
+
 app = FastAPI(
     title="Story Mode Adventure Game",
     description="An AI-powered adventure game",
