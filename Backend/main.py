@@ -2,6 +2,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# pyrefly: ignore [missing-import]
+from core.config import settings
+
 app = FastAPI(
     title="Story Mode Adventure Game",
     description="An AI-powered adventure game",
@@ -12,7 +15,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True
