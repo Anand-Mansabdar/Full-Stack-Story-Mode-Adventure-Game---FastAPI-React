@@ -5,6 +5,7 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
@@ -31,7 +32,9 @@ class StoryGenerator:
   @classmethod
   def _get_llm(cls):
     return ChatGroq(
-      model="llama-3.3-70b-versatile"
+      model="llama-3.3-70b-versatile",
+      temperature=0,
+      max_retries=2
     )
   
   @classmethod
@@ -46,14 +49,31 @@ class StoryGenerator:
     ).partial(format_instructions=story_parser.get_format_instructions())
 
 
-    raw_response = llm.invoke(prompt.invoke({}))
+    # Retry logic: attempt up to 3 times to get a valid response
+    last_error = None
+    for attempt in range(3):
+      try:
+        raw_response = llm.invoke(prompt.invoke({}))
 
-    response_text = raw_response
+        response_text = raw_response
 
-    if hasattr(raw_response, "content"):
-      response_text = raw_response.content
+        if hasattr(raw_response, "content"):
+          response_text = raw_response.content
 
-    story_structure = story_parser.parse(response_text)
+        if not response_text or response_text.strip() == "":
+          raise ValueError(f"LLM returned empty response on attempt {attempt + 1}")
+
+        story_structure = story_parser.parse(response_text)
+        break  # Success - exit retry loop
+      except Exception as e:
+        last_error = e
+        print(f"Attempt {attempt + 1} failed: {e}")
+        if attempt < 2:
+          time.sleep(2)  # Brief delay before retry
+        continue
+    else:
+      # All retries exhausted
+      raise RuntimeError(f"Failed to generate story after 3 attempts. Last error: {last_error}")
 
     story_db = Story(title=story_structure.title, session_id=session_id)
     db.add(story_db)
