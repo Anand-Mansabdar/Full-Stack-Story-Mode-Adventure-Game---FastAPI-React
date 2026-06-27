@@ -32,7 +32,9 @@ const StoryLoader = () => {
       if (err.response?.status === 404) {
         setError("Story not found.");
       } else {
-        setError("Failed to load story");
+        setError(
+          err.response?.data?.detail || err.message || "Failed to load story",
+        );
       }
     } finally {
       setLoading(false);

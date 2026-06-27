@@ -65,7 +65,7 @@ const StoryGame = ({ story, onNewStory }) => {
                   {options.map((option, index) => {
                     return (
                       <button
-                        onClick={chooseOption(option.node_id)}
+                        onClick={() => chooseOption(option.node_id)}
                         key={index}
                         className="option-btn"
                       >
